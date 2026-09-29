@@ -1,0 +1,88 @@
+name: Ticket monitor
+on:
+  schedule:
+    - cron: '17 * * 9-12 *'
+  workflow_dispatch:
+    inputs:
+      initialize:
+        description: 'First deployment only: create missing monitor-state branch'
+        type: boolean
+        default: false
+      force:
+        description: 'Check now regardless of cadence (end-date stop still applies)'
+        type: boolean
+        default: false
+      notify:
+        description: 'Deliver eligible queued Telegram alerts'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: doomsday-monitor
+  cancel-in-progress: false
+jobs:
+  monitor:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (github.event_name == 'workflow_dispatch' || vars.MONITOR_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: false
+      - run: uv sync --locked --no-dev
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.initialize && github.event.repository.default_branch || 'monitor-state' }}
+          path: .monitor/cloud
+          fetch-depth: 0
+      - name: Configure state commit identity
+        working-directory: .monitor/cloud
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Initialize missing state branch explicitly
+        if: inputs.initialize
+        working-directory: .monitor/cloud
+        run: |
+          set +e
+          git ls-remote --exit-code --heads origin monitor-state > /dev/null
+          result=$?
+          set -e
+          if [ "$result" -ne 2 ]; then
+            echo 'Initialization requires a missing state branch and a working remote.'
+            exit 1
+          fi
+          git switch --orphan monitor-state
+          ../../.venv/bin/python -c 'from pathlib import Path; from doomsday.state import State; Path("state.json").write_text(State(namespace="production").model_dump_json(indent=2) + "\n")'
+          git add state.json
+          git commit -m 'Initialize monitor state'
+          git push origin HEAD:refs/heads/monitor-state
+      - name: Install browser only for enabled BookMyShow checks
+        if: '!inputs.initialize'
+        run: |
+          if uv run --locked --no-dev python -c 'from pathlib import Path; from doomsday.config import load_config; raise SystemExit(not load_config(Path("config/monitor.yml")).providers.get("bookmyshow", False))'; then
+            uv run --locked --no-dev playwright install --with-deps chromium
+          fi
+      - name: Run monitoring
+        if: '!inputs.initialize'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FORCE_CHECK: ${{ inputs.force }}
+          SEND_ALERTS: ${{ github.event_name == 'schedule' || inputs.notify }}
+        run: |
+          args=()
+          if [ "$FORCE_CHECK" = 'true' ]; then args+=(--force); fi
+          if [ "$SEND_ALERTS" = 'true' ]; then args+=(--notify); fi
+          uv run --locked --no-dev python -m doomsday.scheduled --state-repo .monitor/cloud "${args[@]}"
+      - name: Run summary
+        if: always()
+        run: |
+          echo '### Ticket monitor' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Inspect the monitoring JSON above for provider checks, schedule decisions, and delivery outcomes. A failed provider is not evidence of unavailable tickets.' >> "$GITHUB_STEP_SUMMARY"

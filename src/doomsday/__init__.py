@@ -1,0 +1,1 @@
+"""Doomsday ticket monitoring foundation."""

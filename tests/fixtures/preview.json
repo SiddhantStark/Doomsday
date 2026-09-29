@@ -1,0 +1,36 @@
+[
+  {
+    "movie": "Avengers: Doomsday",
+    "city": "Chennai",
+    "venue": "BSR Mall Thoraipakkam",
+    "target_date": "2026-12-18",
+    "checked_at": "2026-12-01T12:00:00+05:30",
+    "provider": "bookmyshow",
+    "state": "COMING_SOON"
+  },
+  {
+    "movie": "Avengers: Doomsday",
+    "city": "Chennai",
+    "venue": "BSR Mall Thoraipakkam",
+    "target_date": "2026-12-18",
+    "checked_at": "2026-12-01T12:00:00+05:30",
+    "provider": "district",
+    "state": "FIRST_SHOW_AVAILABLE",
+    "shows": [
+      {
+        "starts_at": "2026-12-18T10:30:00+05:30",
+        "status": "AVAILABLE",
+        "booking_url": "https://example.com/fixture-booking"
+      },
+      {
+        "starts_at": "2026-12-18T07:00:00+05:30",
+        "status": "SOLD_OUT"
+      },
+      {
+        "starts_at": "2026-12-18T09:00:00+05:30",
+        "status": "FAST_FILLING",
+        "booking_url": "https://example.com/fixture-booking"
+      }
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+target:
+  movie: 'Avengers: Doomsday'
+  city: Chennai
+  venue: BSR Mall Thoraipakkam
+  venue_aliases:
+    - 'Cinepolis: BSR Mall, OMR, Thoraipakkam'
+    - Cinepolis BSR Mall OMR, Thoraipakkam, Chennai
+    - Cinepolis BSR Mall OMR
+    - BSR Cinemas Thoraipakkam
+  date: '2026-12-18'
+  timezone: Asia/Kolkata
+  show_strategy: EARLIEST_AVAILABLE
+providers:
+  bookmyshow: true
+  district: true
+monitor:
+  interval_minutes: 60
+  schedule_bands:
+    - start: '2026-09-01'
+      interval_minutes: 1440
+    - start: '2026-11-01'
+      interval_minutes: 360
+    - start: '2026-12-01'
+      interval_minutes: 60
+retry:
+  attempts: 3
+  backoff_seconds: [5, 15]
+notifications:
+  channel: telegram
+  enabled: true
+  allow_paid_broadcast: false
+log_level: INFO
+bookmyshow:
+  movie_url: https://in.bookmyshow.com/movies/chennai/avengers-doomsday/ET00439706
+  movie_id: ET00439706
+  cinema_url: https://in.bookmyshow.com/cinemas/chennai/cinepolis-bsr-mall-omr-thoraipakkam/buytickets/CBMC
+  venue_id: CBMC
