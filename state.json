@@ -3,15 +3,15 @@
   "namespace": "production",
   "observations": {
     "8adaf0a2b42a3d7d1383562455fefb03dcb5a6984b868b2f8745eb3c379b5574": {
-      "last_check": "2026-09-29T13:56:03.739982+05:30",
+      "last_check": "2026-09-29T13:57:21.112742+05:30",
       "last_success": null,
-      "failures": 1,
+      "failures": 2,
       "ever_available": false
     },
     "95e4114d7f55744af816ef88f5636d2ae6533c068ce7b4420ddf77389464d2a5": {
-      "last_check": "2026-09-29T13:56:03.799198+05:30",
+      "last_check": "2026-09-29T13:57:21.187851+05:30",
       "last_success": null,
-      "failures": 1,
+      "failures": 2,
       "ever_available": false
     }
   },
