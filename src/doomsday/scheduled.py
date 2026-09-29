@@ -52,11 +52,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", type=Path, default=Path("config/monitor.yml"))
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--notify", action="store_true")
+    parser.add_argument("--gate-only", action="store_true")
     args = parser.parse_args(argv)
     try:
         config = load_config(args.config)
         state = JsonStore(args.state_repo / "state.json", "production").read()
         decision = due(config, state, now_ist(), args.force)
+        if args.gate_only:
+            print("true" if decision == "due" else "false")
+            return 0
         print(
             json.dumps(
                 {

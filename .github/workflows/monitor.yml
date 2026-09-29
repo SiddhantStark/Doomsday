@@ -63,14 +63,25 @@ jobs:
           git add state.json
           git commit -m 'Initialize monitor state'
           git push origin HEAD:refs/heads/monitor-state
-      - name: Install browser only for enabled BookMyShow checks
+      - name: Check cadence before installing browser
+        id: cadence
         if: '!inputs.initialize'
+        env:
+          FORCE_CHECK: ${{ inputs.force }}
+        run: |
+          args=()
+          if [ "$FORCE_CHECK" = 'true' ]; then args+=(--force); fi
+          decision=$(uv run --locked --no-dev python -m doomsday.scheduled --state-repo .monitor/cloud --gate-only "${args[@]}")
+          echo "due=$decision" >> "$GITHUB_OUTPUT"
+          echo "Monitoring due: $decision"
+      - name: Install browser only for enabled BookMyShow checks
+        if: steps.cadence.outputs.due == 'true'
         run: |
           if uv run --locked --no-dev python -c 'from pathlib import Path; from doomsday.config import load_config; raise SystemExit(not load_config(Path("config/monitor.yml")).providers.get("bookmyshow", False))'; then
             uv run --locked --no-dev playwright install --with-deps chromium
           fi
       - name: Run monitoring
-        if: '!inputs.initialize'
+        if: steps.cadence.outputs.due == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
