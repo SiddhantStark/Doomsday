@@ -1,6 +1,6 @@
 # Doomsday Ticket Monitor
 
-Python application for monitoring Avengers: Doomsday at BSR Thoraipakkam on December 18, 2026. Telegram is the only alert channel. **BookMyShow read-only checks are implemented but currently blocked by HTTP 403 in standalone Chromium. District read-only checks are implemented and locally live-validated. Durable JSON/Git state and change detection are implemented. Telegram delivery from the event queue is implemented. Cloud deployment is not implemented yet.**
+Python application for monitoring Avengers: Doomsday at BSR Thoraipakkam on December 18, 2026. Telegram is the only alert channel. **BookMyShow read-only checks are implemented but currently blocked by HTTP 403 in standalone Chromium. District read-only checks are implemented and locally live-validated. Durable JSON/Git state and change detection are implemented. Telegram delivery from the event queue is implemented. GitHub Actions infrastructure is deployed, but scheduled monitoring is disabled because both providers return HTTP 403 from GitHub runners.**
 
 ## Local setup
 
@@ -71,7 +71,7 @@ Use a public GitHub repository, standard Linux Actions runners, and a small JSON
 - `docs/`: feasibility evidence, Telegram setup, hosting decision.
 - [ROADMAP.md](ROADMAP.md): completed work and next phases.
 
-Next: Phase 6 cloud scheduling and deployment validation. BookMyShow live acceptance remains blocked.
+Next: resolve the Phase 6 cloud access blocker before enabling scheduled monitoring. BookMyShow live acceptance remains blocked.
 
 ## District and combined read-only checks
 
@@ -101,3 +101,9 @@ uv run --locked doomsday --state .monitor/state.json --send-pending
 ```
 
 These commands send eligible production events to the configured Telegram chat. State must already exist (or be explicitly initialized with the provider command). Without `--notify`, checks remain record-only. Dry runs and synthetic state cannot send. See [Phase 5 usage, retries, and uncertain-send recovery](docs/PHASE_5_TELEGRAM.md).
+
+## Cloud deployment status
+
+[Public repository](https://github.com/SiddhantStark/Doomsday) · [Workflow runs](https://github.com/SiddhantStark/Doomsday/actions)
+
+CI, private Actions Secrets, and the durable state branch are deployed. Two fresh cloud runs preserved state correctly but both providers returned HTTP 403. District still works locally. `MONITOR_ENABLED=false` keeps scheduled checks paused; manual runs remain available. See [Phase 6 evidence and operations](docs/PHASE_6_DEPLOYMENT.md).

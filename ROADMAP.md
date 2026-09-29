@@ -109,15 +109,17 @@ Exit gate: the recipient confirms the test message, acceptance/error tracking wo
 
 ## Phase 6 — Deploy scheduled execution
 
-Estimated effort: 1–2 days. Depends on Phases 4–5.
+Status: infrastructure deployed and state recovery verified, but live cloud acceptance is blocked: both providers return HTTP 403 from GitHub runners. Scheduled monitoring remains disabled. See [deployment evidence](docs/PHASE_6_DEPLOYMENT.md).
 
-- [ ] Add manual and scheduled GitHub Actions entry points, locked dependencies via `uv sync --locked --no-dev`, and Playwright installation only if needed.
-- [ ] Configure secrets and restore/persist the chosen durable state backend on every run.
-- [ ] Serialize manual and scheduled executions; avoid cancelling an active send midway.
-- [ ] Implement the PRD's date-based check frequency and configure timezone conversion explicitly.
-- [ ] Add run timeouts, meaningful exit codes, bounded diagnostic retention, and stale-check visibility.
-- [ ] Verify the actual account/repository free runner and storage allowances against measured runtime and schedule; reduce usage or stop if necessary, without enabling billing.
-- [ ] Test two fresh runner executions against the same state; verify the second does not resend the first alert.
+- [x] Add manual and scheduled GitHub Actions entry points, locked dependencies via `uv sync --locked --no-dev`, and Playwright installation only if needed.
+- [x] Configure secrets and restore/persist the chosen durable state backend on every run.
+- [x] Serialize manual and scheduled executions; avoid cancelling an active send midway.
+- [x] Implement the PRD's date-based check frequency and configure timezone conversion explicitly.
+- [x] Add run timeouts, meaningful exit codes, bounded diagnostic retention, and stale-check visibility.
+- [x] Verify the actual account/repository free runner and storage allowances against measured runtime and schedule; reduce usage or stop if necessary, without enabling billing.
+- [x] Verify two fresh runners restore and update the same state (failure counters progressed from 1 to 2; no events or messages).
+- [ ] Verify cloud availability-to-alert delivery and duplicate suppression with a usable provider.
+- [ ] Activate scheduled monitoring after cloud provider access is resolved.
 
 Deliverable: unattended cloud monitoring continues with the laptop offline.
 
