@@ -109,6 +109,8 @@ Exit gate: the recipient confirms the test message, acceptance/error tracking wo
 
 ## Phase 6 — Deploy scheduled execution
 
+October 2 update: the user accepted this Mac as a temporary host. A LaunchAgent is installed and its first real provider/state/delivery run succeeded without errors. Cloud scheduling stays disabled. See [Mac operations](docs/MACOS_HOST.md). Cloud acceptance and laptop-off operation remain deferred.
+
 Status: infrastructure deployed and state recovery verified, but live cloud acceptance is blocked: both providers return HTTP 403 from GitHub runners, including the October 2 headed Chromium/Xvfb diagnostic. Scheduled monitoring remains disabled. See [deployment evidence](docs/PHASE_6_DEPLOYMENT.md).
 
 - [x] Add manual and scheduled GitHub Actions entry points, locked dependencies via `uv sync --locked --no-dev`, and Playwright installation only if needed.

@@ -118,3 +118,7 @@ uv run --locked doomsday --once --dry-run --provider all --headed
 `--headed` opens a visible Chromium window for BookMyShow, then closes it after extraction. District continues to use its HTTP reader. It requires a desktop display and an enabled BookMyShow provider; it is rejected for District-only or fixture commands. Omitting it retains the existing headless behavior. The flag changes only browser visibility; normal dry-run/state/notification rules still apply.
 
 Locally validated September 29: Avengers returns `COMING_SOON` on BookMyShow and `MOVIE_LISTED` on District. An isolated Heart of the Beast configuration completed movie-to-venue extraction and selected 16:55 IST from 16:55 and 22:20 shows. No messages or production state writes occurred. Cloud visible-browser access remains unverified and schedules remain disabled.
+
+## Active temporary host
+
+This Mac now runs the monitor through a LaunchAgent, with local state and Telegram delivery enabled. Keep it logged in, awake, and online. GitHub scheduling remains disabled. See [local operation and pause/recovery commands](docs/MACOS_HOST.md).

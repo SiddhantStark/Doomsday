@@ -48,7 +48,10 @@ def due(config: Config, state: State, now: datetime, force: bool = False) -> str
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--state-repo", type=Path, required=True)
+    backend = parser.add_mutually_exclusive_group(required=True)
+    backend.add_argument("--state-repo", type=Path)
+    backend.add_argument("--state", type=Path)
+    parser.add_argument("--headed", action="store_true")
     parser.add_argument("--config", type=Path, default=Path("config/monitor.yml"))
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--notify", action="store_true")
@@ -56,7 +59,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         config = load_config(args.config)
-        state = JsonStore(args.state_repo / "state.json", "production").read()
+        state_path = args.state or args.state_repo / "state.json"
+        state = JsonStore(state_path, "production").read()
         decision = due(config, state, now_ist(), args.force)
         if args.gate_only:
             print("true" if decision == "due" else "false")
@@ -76,9 +80,11 @@ def main(argv: list[str] | None = None) -> int:
             str(args.config),
             "--provider",
             "all",
-            "--state-repo",
-            str(args.state_repo),
+            "--state" if args.state else "--state-repo",
+            str(args.state or args.state_repo),
         ]
+        if args.headed:
+            command.append("--headed")
         if args.notify:
             command.append("--notify")
         return monitor_main(command)
