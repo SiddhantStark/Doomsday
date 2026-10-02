@@ -109,7 +109,7 @@ Exit gate: the recipient confirms the test message, acceptance/error tracking wo
 
 ## Phase 6 — Deploy scheduled execution
 
-Status: infrastructure deployed and state recovery verified, but live cloud acceptance is blocked: both providers return HTTP 403 from GitHub runners. Scheduled monitoring remains disabled. See [deployment evidence](docs/PHASE_6_DEPLOYMENT.md).
+Status: infrastructure deployed and state recovery verified, but live cloud acceptance is blocked: both providers return HTTP 403 from GitHub runners, including the October 2 headed Chromium/Xvfb diagnostic. Scheduled monitoring remains disabled. See [deployment evidence](docs/PHASE_6_DEPLOYMENT.md).
 
 - [x] Add manual and scheduled GitHub Actions entry points, locked dependencies via `uv sync --locked --no-dev`, and Playwright installation only if needed.
 - [x] Configure secrets and restore/persist the chosen durable state backend on every run.

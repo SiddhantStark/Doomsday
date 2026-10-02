@@ -45,3 +45,11 @@ State history grows with changed observations, capped by the check cadence; unch
 ## Blocker and next decision
 
 Do not activate repeated checks against the current blocked providers. Resolve permitted cloud access, or choose a runtime/network that can access District. Local District checks currently work, but using this Mac for scheduling would require it to stay online; the laptop-off goal is not met by that alternative. No anti-bot bypass, paid proxy, or additional account was introduced. Phase 6 remains incomplete until a usable runtime is validated.
+
+## October 2 — Headed cloud diagnostic
+
+[Diagnostic run](https://github.com/SiddhantStark/Doomsday/actions/runs/36988909738) installed Chromium and ran it in headed mode under Xvfb on a standard GitHub Linux runner. All four independently checked pages returned HTTP 403: BookMyShow's Chennai Avengers page and October 2 BSR cinema schedule, and District's Avengers page and October 2 BSR cinema schedule. Both normalized provider results were `CHECK_FAILED / HTTP_403`. Runtime was 35 seconds.
+
+The diagnostic has only contents-read permission, no Telegram secrets, no state checkout, no persistent browser profile, and no notification calls. It writes sanitized status/structure information to job logs, not raw HTML or cookies. No messages were sent and no production state changed. It remains manually callable as `Read-only browser diagnostic`; it is not scheduled.
+
+Visible mode alone does not resolve cloud access. The exact provider filtering rule remains unknown. Phase 6 cannot be marked complete on these results. Scheduling stays disabled until a permitted, usable runtime has been verified. Completing the phase requires a hosting/access decision; local scheduling changes the laptop-off requirement, while supported cloud/API access requires further investigation.
