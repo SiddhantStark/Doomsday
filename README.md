@@ -1,6 +1,6 @@
 # Doomsday Ticket Monitor
 
-Python application for monitoring Avengers: Doomsday at BSR Thoraipakkam on December 18, 2026. Telegram is the only alert channel. **BookMyShow read-only checks are implemented but currently blocked by HTTP 403 in standalone Chromium. District read-only checks are implemented and locally live-validated. Durable JSON/Git state and change detection are implemented. Telegram delivery from the event queue is implemented. GitHub Actions infrastructure is deployed, but scheduled monitoring is disabled because both providers return HTTP 403 from GitHub runners.**
+Python application for monitoring Avengers: Doomsday at BSR Thoraipakkam on December 18, 2026. Telegram is the only alert channel. **BookMyShow checks work locally with `--headed`; default headless Chromium remains blocked by HTTP 403. District read-only checks are implemented and locally live-validated. Durable JSON/Git state and change detection are implemented. Telegram delivery from the event queue is implemented. GitHub Actions infrastructure is deployed, but scheduled monitoring is disabled because both providers return HTTP 403 from GitHub runners.**
 
 ## Local setup
 
@@ -107,3 +107,14 @@ These commands send eligible production events to the configured Telegram chat. 
 [Public repository](https://github.com/SiddhantStark/Doomsday) · [Workflow runs](https://github.com/SiddhantStark/Doomsday/actions)
 
 CI, private Actions Secrets, and the durable state branch are deployed. Two fresh cloud runs preserved state correctly but both providers returned HTTP 403. District still works locally. `MONITOR_ENABLED=false` keeps scheduled checks paused; manual runs remain available. See [Phase 6 evidence and operations](docs/PHASE_6_DEPLOYMENT.md).
+
+## Visible browser checks
+
+```sh
+uv run --locked playwright install chromium
+uv run --locked doomsday --once --dry-run --provider all --headed
+```
+
+`--headed` opens a visible Chromium window for BookMyShow, then closes it after extraction. District continues to use its HTTP reader. It requires a desktop display and an enabled BookMyShow provider; it is rejected for District-only or fixture commands. Omitting it retains the existing headless behavior. The flag changes only browser visibility; normal dry-run/state/notification rules still apply.
+
+Locally validated September 29: Avengers returns `COMING_SOON` on BookMyShow and `MOVIE_LISTED` on District. An isolated Heart of the Beast configuration completed movie-to-venue extraction and selected 16:55 IST from 16:55 and 22:20 shows. No messages or production state writes occurred. Cloud visible-browser access remains unverified and schedules remain disabled.

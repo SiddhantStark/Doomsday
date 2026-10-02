@@ -6,6 +6,7 @@ import argparse
 import json
 import logging
 import os
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -170,6 +171,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--resolve-event", help="Resolve an uncertain/failed event ID")
     parser.add_argument("--resolution", choices=["retry", "accepted"])
+    parser.add_argument(
+        "--headed",
+        action="store_true",
+        help="Use a visible browser for BookMyShow (requires a desktop display)",
+    )
     args = parser.parse_args(argv)
     load_dotenv()
     secrets = tuple(
@@ -179,6 +185,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         config = load_config(args.config)
         configure_logging(config.log_level, secrets)
+        if args.headed and (
+            args.provider not in ("bookmyshow", "all")
+            or not config.providers.get("bookmyshow", False)
+        ):
+            logger.error("--headed requires an enabled BookMyShow provider check")
+            return 2
         if args.state and args.state_repo:
             raise ValueError("select one state backend")
         if args.init_state and (args.dry_run or not (args.state or args.state_repo)):
@@ -288,7 +300,7 @@ def main(argv: list[str] | None = None) -> int:
                     settings.cinema_url,
                     settings.movie_id,
                     settings.venue_id,
-                    fetch_page,
+                    partial(fetch_page, headed=True) if args.headed else fetch_page,
                 ),
                 "district": DistrictProvider(config.district),
             }

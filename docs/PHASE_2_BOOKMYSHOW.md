@@ -1,6 +1,6 @@
 # Phase 2 — BookMyShow implementation and validation
 
-Status: implementation and offline tests complete; live acceptance gate blocked by HTTP 403 in standalone Chromium. Do not treat this provider as operational yet.
+Status: implementation tested and local visible-browser movie/venue extraction validated. Default headless and cloud access remain blocked; full live acceptance coverage is still pending.
 
 ## Implemented
 
@@ -36,3 +36,24 @@ uv run --locked doomsday --once --dry-run --provider bookmyshow
 ```
 
 This validation session installed Chromium under `/tmp/doomsday-playwright`. To reuse it locally, prefix the run command with `PLAYWRIGHT_BROWSERS_PATH=/tmp/doomsday-playwright`. The standard install command above uses Playwright's default cache instead.
+
+## September 29 — Local visible/headless comparison
+
+Fresh unauthenticated contexts on the same Mac, same Playwright installation (Chromium 153.0.8010.12), `en-IN` locale, IST timezone, and navigation/render waits were used. No reused cookies, stealth settings, or production state writes.
+
+| Page | Visible Chromium | Default headless Chromium |
+|---|---|---|
+| Avengers: Doomsday, Bengaluru | HTTP 200, movie content | HTTP 403, Cloudflare block |
+| Avengers: Doomsday, Chennai | HTTP 200, movie content | HTTP 403, Cloudflare block |
+| The Paradise, Bengaluru, September 29 show listings | HTTP 200, cinemas/showtimes visible | HTTP 403, Cloudflare block |
+| Cinepolis BSR Mall, Chennai, September 29 schedule | HTTP 200, 25 Book controls | HTTP 403, Cloudflare block |
+
+The existing movie parser returned `COMING_SOON` for Chennai. The existing venue parser processed the captured visible-browser schedule for the isolated current movie Heart of the Beast (ET00504928), returning bookable 16:55 and 22:20 IST shows and selecting 16:55 as earliest. The production Avengers target remained unchanged. The Bengaluru movie-centric schedule has a different DOM and was checked for access/content only, not passed through the cinema-centric parser.
+
+This establishes local visible-browser access and one current-movie parser example. It narrows the previous local failure to differences associated with the launch mode/default browser build; Playwright's default headless launch may use its separate headless-shell executable. It does not identify Cloudflare's exact rule or isolate executable differences from all timing effects. Visible requests were performed first, then headless requests, one per URL, without retries on blocks.
+
+The prior blanket statement that standalone Playwright cannot access BookMyShow is superseded by this evidence. Full language/format coverage, sold-out markup, sustained reliability, and cloud visible-browser access remain unverified. GitHub scheduling remains disabled. No Telegram messages were sent.
+
+### Application integration
+
+The CLI now supports `--headed` for BookMyShow and combined provider checks. Headless remains the default. On September 29, the real CLI completed both configured providers successfully in read-only mode. A separate temporary current-movie config also completed the full BookMyShow movie-page → venue-page → normalized earliest-show flow, returning Heart of the Beast at 16:55 and 22:20 IST. This used the production parser and transport with visible mode; no fixture responses were substituted. The configured Avengers target, notification state, and cloud schedule were unchanged. All 97 tests and Ruff checks passed.

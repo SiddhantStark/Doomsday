@@ -5,10 +5,12 @@ from playwright.sync_api import Error, TimeoutError, sync_playwright
 from .bookmyshow import CheckError, PageSnapshot, page_root
 
 
-def fetch_page(url: str, timeout_ms: int = 20000) -> PageSnapshot:
+def fetch_page(
+    url: str, timeout_ms: int = 20000, *, headed: bool = False
+) -> PageSnapshot:
     try:
         with sync_playwright() as engine:
-            browser = engine.chromium.launch()
+            browser = engine.chromium.launch(headless=not headed)
             try:
                 page = browser.new_page(locale="en-IN", timezone_id="Asia/Kolkata")
                 response = page.goto(

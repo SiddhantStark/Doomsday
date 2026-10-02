@@ -192,3 +192,25 @@ def test_live_cli_reports_failure_without_fixture_claim(
     assert output["synthetic"] is False
     assert output["result"]["error"] == "HTTP_403"
     assert output["messages_sent"] == 0
+
+
+def test_headed_cli_routes_to_browser(monkeypatch, capsys):
+    from doomsday import browser
+    from doomsday.cli import main
+
+    calls = []
+
+    def fetch(url, *, headed=False):
+        calls.append(headed)
+        return PageSnapshot(url, "", 403)
+
+    monkeypatch.setattr(browser, "fetch_page", fetch)
+    assert main(["--dry-run", "--provider", "bookmyshow", "--headed"]) == 1
+    assert calls == [True]
+    assert '"messages_sent": 0' in capsys.readouterr().out
+
+
+def test_headed_rejects_non_browser_command():
+    from doomsday.cli import main
+
+    assert main(["--dry-run", "--provider", "district", "--headed"]) == 2
