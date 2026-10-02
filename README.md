@@ -122,3 +122,7 @@ Locally validated September 29: Avengers returns `COMING_SOON` on BookMyShow and
 ## Active temporary host
 
 This Mac now runs the monitor through a LaunchAgent, with local state and Telegram delivery enabled. Keep it logged in, awake, and online. GitHub scheduling remains disabled. See [local operation and pause/recovery commands](docs/MACOS_HOST.md).
+
+## Readiness and operations
+
+Run `uv run --locked python -m doomsday.health` for a read-only state health report. See [operating runbook](docs/RUNBOOK.md) and [Phase 7 acceptance evidence](docs/PHASE_7_READINESS.md). The 48–72-hour Mac observation period remains open.

@@ -129,14 +129,14 @@ Exit gate: scheduled runs, state recovery, and deliberate provider/message failu
 
 ## Phase 7 — Verify readiness and operate
 
-Estimated effort: 2–3 engineering days plus a 48–72-hour observation period. Depends on Phase 6.
+Status: immediate readiness work completed on October 2 for the accepted Mac host; observation period and release-window revalidation remain open. See [evidence](docs/PHASE_7_READINESS.md) and [runbook](docs/RUNBOOK.md).
 
-- [ ] Run all acceptance scenarios, including wrong venue/date, sold-out shows, earlier shows, reappearance, provider isolation, and delivery failures.
-- [ ] Simulate target availability end to end with isolated test state; avoid mixing test events with production history.
-- [ ] Soak-test cloud checks for 48–72 hours; inspect check timing, parser reliability, persistence, retries, and duplicate suppression.
-- [ ] Record known access limitations. Never label a blocked provider healthy or unavailable.
-- [ ] Write a runbook for credentials, blocked bot or invalid token, parser changes, missed runs, state recovery, pause/resume, and costs.
-- [ ] Configure an end-of-target-date stop in Asia/Kolkata, with explicit extension if desired.
+- [x] Run automated acceptance scenarios, including wrong venue/date, sold-out shows, earlier shows, reappearance, provider isolation, and delivery failures.
+- [x] Simulate target availability through detection, durable state, mocked Telegram acceptance and restart deduplication in isolated test state. No fabricated alerts sent to the real chat.
+- [ ] Soak-test the accepted Mac host for 48–72 hours; inspect check timing, parser reliability, persistence, retries, and duplicate suppression.
+- [x] Record known access limitations. Never label a blocked provider healthy or unavailable.
+- [x] Write a runbook for credentials, blocked bot or invalid token, parser changes, missed runs, state recovery, pause/resume, and costs.
+- [x] Configure and test an end-of-target-date stop in Asia/Kolkata, with explicit extension if desired.
 - [ ] Revalidate live provider pages and Telegram alerts before increasing monitoring frequency.
 
 Deliverable: completed acceptance checklist and operating runbook.

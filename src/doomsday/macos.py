@@ -53,6 +53,7 @@ def main() -> int:
             logger.error("LAUNCHAGENT_RUN_FAILED")
         finally:
             status = {"finished_at": now_ist().isoformat(), "exit_code": code}
+            logger.info("Launcher completed: %s", json.dumps(status))
             temporary = runtime / "last-run.tmp"
             temporary.write_text(json.dumps(status, indent=2) + "\n")
             temporary.replace(runtime / "last-run.json")
