@@ -84,7 +84,9 @@ def preview(results: list[ProviderResult], config: Config) -> dict:
     }
 
 
-def persist_results(results: list[ProviderResult], args: argparse.Namespace) -> dict:
+def persist_results(
+    results: list[ProviderResult], args: argparse.Namespace, config: Config
+) -> dict:
     from .git_state import GitStore
 
     namespace = "synthetic" if args.fixture else "production"
@@ -94,7 +96,9 @@ def persist_results(results: list[ProviderResult], args: argparse.Namespace) -> 
         else JsonStore(args.state, namespace)
     )
     with store.transaction(initialize=args.init_state, readonly=args.dry_run) as state:
-        events = apply_results(state, results)
+        events = apply_results(
+            state, results, summary=config.notifications.status_summaries
+        )
         pending = [
             e.model_dump(mode="json") for e in state.events if e.status == "pending"
         ]
@@ -329,7 +333,7 @@ def main(argv: list[str] | None = None) -> int:
                     else None
                 )
             if args.state or args.state_repo:
-                payload.update(persist_results(results, args))
+                payload.update(persist_results(results, args, config))
             if args.notify:
                 payload.update(send_queue(args, config))
                 payload.pop("messages_sent", None)
@@ -350,7 +354,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.state:
             payload.pop("assumption", None)
             payload.pop("intended_events", None)
-            payload.update(persist_results(results, args))
+            payload.update(persist_results(results, args, config))
         print(json.dumps(payload, indent=2))
         logger.info("Synthetic processing completed; no messages sent")
         return 0

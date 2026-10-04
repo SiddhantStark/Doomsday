@@ -64,6 +64,7 @@ class Monitor(Model):
 
 
 class Notifications(Model):
+    status_summaries: bool = False
     channel: Literal["telegram"] = "telegram"
     enabled: bool = True
     allow_paid_broadcast: Literal[False] = False

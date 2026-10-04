@@ -45,6 +45,7 @@ class OutboxEvent(Model):
     kind: EventKind
     observation: ProviderResult
     show: Show | None
+    report_results: list[ProviderResult] = Field(default_factory=list)
     created_at: AwareDatetime
     status: Literal[
         "pending", "sending", "accepted", "failed", "uncertain", "skipped"
@@ -60,6 +61,26 @@ class OutboxEvent(Model):
             raise ValueError("accepted events require acceptance timestamp")
         if self.target_key != target_key(self.observation):
             raise ValueError("event target mismatch")
+        if self.kind == EventKind.STATUS_SUMMARY:
+            if not self.report_results or self.show is not None:
+                raise ValueError("summary requires results without event show")
+            if self.observation != self.report_results[0]:
+                raise ValueError("summary anchor mismatch")
+            if len({r.provider for r in self.report_results}) != len(
+                self.report_results
+            ):
+                raise ValueError("duplicate summary provider")
+            for result in self.report_results:
+                if (result.movie, result.city, result.venue, result.target_date) != (
+                    self.observation.movie,
+                    self.observation.city,
+                    self.observation.venue,
+                    self.observation.target_date,
+                ):
+                    raise ValueError("summary target mismatch")
+            return self
+        if self.report_results:
+            raise ValueError("unexpected summary results")
         if self.kind == EventKind.HEALTH_WARNING:
             if not self.observation.error or self.show is not None:
                 raise ValueError("health event requires a failed check")
@@ -71,7 +92,7 @@ class OutboxEvent(Model):
 
 
 class State(Model):
-    version: Literal[2] = 2
+    version: Literal[3] = 3
     namespace: Literal["production", "synthetic"]
     observations: dict[str, Observation] = Field(default_factory=dict)
     events: list[OutboxEvent] = Field(default_factory=list)
@@ -93,17 +114,21 @@ class State(Model):
         return self
 
 
-def apply_results(state: State, results: list[ProviderResult]) -> list[OutboxEvent]:
+def apply_results(
+    state: State, results: list[ProviderResult], *, summary: bool = False
+) -> list[OutboxEvent]:
     """Update a transaction copy; failed/stale checks cannot erase success."""
     keys = [target_key(r) for r in results]
     if len(keys) != len(set(keys)):
         raise StateError("DUPLICATE_TARGET")
     created = []
+    fresh_results = []
     for result in results:
         key = target_key(result)
         prior = state.observations.get(key)
         if prior and result.checked_at <= prior.last_check:
             continue
+        fresh_results.append(result)
         previous = prior.last_success if prior else None
         ever = prior.ever_available if prior else False
         if result.error:
@@ -153,6 +178,18 @@ def apply_results(state: State, results: list[ProviderResult]) -> list[OutboxEve
             last_success=previous if uncertain else result,
             ever_available=ever or show is not None,
         )
+    if summary and fresh_results:
+        event = OutboxEvent(
+            id=str(uuid4()),
+            target_key=target_key(fresh_results[0]),
+            kind=EventKind.STATUS_SUMMARY,
+            observation=fresh_results[0],
+            show=None,
+            report_results=fresh_results,
+            created_at=now_ist(),
+        )
+        state.events.append(event)
+        created.append(event)
     return created
 
 
@@ -186,6 +223,7 @@ class JsonStore:
             if raw["version"] == 1:
                 # Lossless v1 migration, committed only on a writable transaction.
                 legacy_fields = set(OutboxEvent.model_fields) - {
+                    "report_results",
                     "attempts",
                     "last_error",
                     "next_attempt_at",
@@ -198,6 +236,12 @@ class JsonStore:
                         raise ValueError("invalid legacy event")
                     item.update(attempts=0, last_error=None, next_attempt_at=None)
                 raw["version"] = 2
+            if raw["version"] == 2:
+                for item in raw["events"]:
+                    if set(item) != set(OutboxEvent.model_fields) - {"report_results"}:
+                        raise ValueError("invalid version 2 event")
+                    item["report_results"] = []
+                raw["version"] = 3
             for item in raw["observations"].values():
                 if set(item) != set(Observation.model_fields):
                     raise ValueError("incomplete observation")

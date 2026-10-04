@@ -26,6 +26,7 @@ retry:
   attempts: 3
   backoff_seconds: [5, 15]
 notifications:
+  status_summaries: true
   channel: telegram
   enabled: true
   allow_paid_broadcast: false

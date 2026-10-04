@@ -56,6 +56,8 @@ def post(token: str, payload: dict) -> tuple[int, dict]:
 
 
 def format_event(event: OutboxEvent) -> str:
+    if event.kind == EventKind.STATUS_SUMMARY:
+        return format_summary(event)
     observation = event.observation
     title = {
         EventKind.BOOKING_OPENED: "Tickets available",
@@ -83,6 +85,38 @@ def format_event(event: OutboxEvent) -> str:
         f"Checked: {observation.checked_at.astimezone(IST):%d %b %Y, %I:%M %p} IST",
         f"Event: {event.id}",
     ]
+    return "\n".join(lines)
+
+
+def format_summary(event: OutboxEvent) -> str:
+    first = event.observation
+    lines = [
+        "Ticket availability update",
+        first.movie,
+        f"{first.venue}, {first.city}",
+        f"Target date: {first.target_date:%d %b %Y}",
+    ]
+    for result in event.report_results:
+        show = result.earliest_show
+        if result.error:
+            detail = "Check failed — availability unknown"
+        elif show:
+            detail = (
+                "Tickets available; earliest "
+                f"{show.starts_at.astimezone(IST):%I:%M %p} IST"
+            )
+        elif result.state == "COMING_SOON":
+            detail = "Coming soon — bookings not open yet"
+        elif any(s.status == "UNKNOWN" for s in result.shows):
+            detail = "Show status unclear — availability unconfirmed"
+        else:
+            detail = "No bookable shows found for this venue and date"
+        lines += [
+            f"\n{result.provider.value}: {detail}",
+            f"Checked: {result.checked_at.astimezone(IST):%d %b %Y, %I:%M %p} IST",
+        ]
+        if show and show.booking_url:
+            lines.append(f"Book: {show.booking_url}")
     return "\n".join(lines)
 
 

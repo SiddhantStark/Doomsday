@@ -4,7 +4,8 @@ from datetime import timedelta
 
 from .config import Config
 from .git_state import GitStore
-from .state import JsonStore, StateError, mark_accepted
+from .models import EventKind
+from .state import JsonStore, StateError, mark_accepted, target_key
 from .telegram import TelegramNotifier, format_event
 from .time_utils import now_ist
 
@@ -63,7 +64,16 @@ def deliver_pending(
                 or latest.last_success.earliest_show is None
                 or latest.last_success.earliest_show.starts_at != event.show.starts_at
             )
-            if event.show is None:
+            if event.kind == EventKind.STATUS_SUMMARY:
+                if not config.notifications.status_summaries:
+                    continue
+                stale = any(
+                    not config.providers.get(r.provider, False)
+                    or target_key(r) not in state.observations
+                    or state.observations[target_key(r)].last_check > r.checked_at
+                    for r in event.report_results
+                )
+            elif event.show is None:
                 stale = latest.failures < 3
             if stale:
                 event.status = "skipped"

@@ -186,10 +186,10 @@ def test_legacy_migration_and_health_throttling(tmp_path: Path) -> None:
     raw = json.loads(store.path.read_text())
     raw["version"] = 1
     for event in raw["events"]:
-        for field in ["attempts", "last_error", "next_attempt_at"]:
+        for field in ["attempts", "last_error", "next_attempt_at", "report_results"]:
             del event[field]
     store.path.write_text(json.dumps(raw))
-    assert store.read().version == 2
+    assert store.read().version == 3
     with store.transaction() as state:
         base = state.events[0].observation
         for n in range(1, 6):

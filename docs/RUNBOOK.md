@@ -72,3 +72,9 @@ The 48–72-hour observation period starts October 2 at 18:37 IST, the first suc
 Review launcher completion timestamps, daily provider timestamps, errors, state integrity, pending/uncertain events, and duplicate messages. At the current daily cadence, expect approximately 2–3 provider checks over this period; hourly launches generally skip. Record sleep/network interruptions and extend the observation period if they prevent meaningful validation.
 
 Before November and again before December, revalidate the real pages, target identities and complete schedules, then send a separately authorized test message if needed. Do not mistake simulated December availability for real tickets. Keep known access limitations visible. Free operation uses existing hardware and Telegram with paid broadcasts disabled; the Mac still consumes power and internet bandwidth.
+
+## Scheduled results summaries
+
+Enabled October 4 at the user's request via `notifications.status_summaries: true`. Each actual check queues one combined Telegram results summary with provider-specific check times and availability details. A failed check says availability is unknown; it never says tickets are unavailable. A launcher wake that skips as not due sends nothing. Existing first-availability, earlier-show, reappearance and health alerts remain enabled, so a meaningful change can produce its dedicated alert plus the summary.
+
+Summaries use the same durable claim/acceptance/retry mechanism as other events. State schema v3 adds summary results and migrates existing v1/v2 files without discarding history. Older application versions that only support v2 cannot read the upgraded file; do not downgrade without a reviewed migration. A fresh manual check was used to validate the initial summary; this also advances the daily cadence timestamp. This feature change is recorded during the observation period and requires subsequent scheduled delivery observation before declaring it soak-tested.
