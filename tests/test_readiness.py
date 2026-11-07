@@ -130,7 +130,9 @@ def test_health_missing_provider_cannot_be_healthy(tmp_path, monkeypatch, capsys
     path = tmp_path / "state.json"
     with JsonStore(path, "production").transaction(initialize=True):
         pass
-    monkeypatch.setattr("sys.argv", ["health", "--state", str(path)])
+    monkeypatch.setattr(
+        "sys.argv", ["health", "--state", str(path), "--config", "config/monitor.yml"]
+    )
     assert main() == 1
     report = json.loads(capsys.readouterr().out)
     assert report["healthy"] is False

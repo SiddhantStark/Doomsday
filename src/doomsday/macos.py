@@ -47,7 +47,14 @@ def main() -> int:
         try:
             with redirect_stdout(LogStream(logger)), redirect_stderr(LogStream(logger)):
                 code = scheduled_main(
-                    ["--state", str(runtime / "state.json"), "--headed", "--notify"]
+                    [
+                        "--state",
+                        str(runtime / "state.json"),
+                        "--headed",
+                        "--notify",
+                        "--locations",
+                        "config/locations.yml",
+                    ]
                 )
         except Exception:
             logger.error("LAUNCHAGENT_RUN_FAILED")

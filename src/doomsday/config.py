@@ -148,3 +148,25 @@ class Config(Model):
 
 def load_config(path: Path) -> Config:
     return Config.model_validate(yaml.safe_load(path.read_text()))
+
+
+def load_locations(path: Path) -> list[tuple[Path, Config]]:
+    """Load all locations before running any checks; paths are manifest-relative."""
+    data = yaml.safe_load(path.read_text())
+    if not isinstance(data, dict) or set(data) != {"locations"}:
+        raise ValueError("invalid location manifest")
+    names = data["locations"]
+    if (
+        not isinstance(names, list)
+        or not names
+        or any(not isinstance(n, str) for n in names)
+    ):
+        raise ValueError("locations must be a nonempty list of config paths")
+    configs = [(path.parent / name, load_config(path.parent / name)) for name in names]
+    identities = [
+        (c.target.movie, c.target.city, c.target.venue, c.target.date)
+        for _, c in configs
+    ]
+    if len(set(identities)) != len(identities):
+        raise ValueError("duplicate monitoring target")
+    return configs

@@ -36,3 +36,7 @@ bookmyshow:
   movie_id: ET00439706
   cinema_url: https://in.bookmyshow.com/cinemas/chennai/cinepolis-bsr-mall-omr-thoraipakkam/buytickets/CBMC
   venue_id: CBMC
+
+district:
+  cinema_url: https://www.district.in/movies/cinepolis-bsr-mall-omr-thoraipakkam-chennai-CD9505
+  venue_id: "9505"

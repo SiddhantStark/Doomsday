@@ -128,3 +128,7 @@ This Mac now runs the monitor through a LaunchAgent, with local state and Telegr
 Run `uv run --locked python -m doomsday.health` for a read-only state health report. See [operating runbook](docs/RUNBOOK.md) and [Phase 7 acceptance evidence](docs/PHASE_7_READINESS.md). The 48–72-hour Mac observation period remains open.
 
 Telegram now sends a combined results summary after each actual check, including “no bookable shows” or “availability unknown” on failures. `notifications.status_summaries` controls this; skipped hourly launcher wakeups stay silent. Availability-change alerts remain enabled.
+
+## Monitored cinemas
+
+The Mac LaunchAgent now monitors **BSR Mall, Thoraipakkam, Chennai** and **Miraj Cinemas: IMAX, Wadala, Mumbai**, using `config/locations.yml`. Both target December 18, 2026. Each location has independent state and cadence and sends its own clearly labeled summary to the Telegram group. See [multi-venue configuration](docs/MULTIPLE_VENUES.md).

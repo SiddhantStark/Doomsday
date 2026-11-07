@@ -27,7 +27,14 @@ def deliver_pending(
         if state.namespace != "production":
             raise StateError("SYNTHETIC_DELIVERY_FORBIDDEN")
         candidates = [
-            e.id for e in state.events if e.status not in ("accepted", "skipped")
+            e.id
+            for e in state.events
+            if e.status not in ("accepted", "skipped")
+            and e.observation.movie == config.target.movie
+            and e.observation.city == config.target.city
+            and e.observation.venue == config.target.venue
+            and e.observation.target_date == config.target.date
+            and config.providers.get(e.observation.provider, False)
         ]
     for event_id in candidates[:20]:
         claimed = None

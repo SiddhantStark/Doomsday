@@ -89,9 +89,7 @@ def parse_schedule(
         raise CheckError("VENUE_URL_MISMATCH")
     if parse_qs(parsed.query).get("fromdate") != [target.date.isoformat()]:
         raise CheckError("SELECTED_DATE_MISMATCH")
-    if str(data["cinemaId"]) != settings.venue_id or normalize(
-        data["cityLabel"]
-    ) != normalize(target.city):
+    if str(data["cinemaId"]) != settings.venue_id:
         raise CheckError("VENUE_OR_CITY_MISMATCH")
     if list(data["serverState"]) != [settings.venue_id + target.date.isoformat()]:
         raise CheckError("SELECTED_DATE_MISMATCH")
@@ -100,6 +98,14 @@ def parse_schedule(
         raise CheckError("SCHEDULE_AMBIGUOUS")
     schedule = states[0]
     cinema = schedule["meta"]["cinema"]
+    city_label = data["cityLabel"]
+    city_matches = normalize(city_label) == normalize(target.city)
+    if not city_label:
+        city_matches = normalize(target.city) in {
+            normalize(part) for part in cinema.get("address", "").split(",")
+        }
+    if not city_matches:
+        raise CheckError("VENUE_OR_CITY_MISMATCH")
     aliases = {normalize(v) for v in [target.venue, *target.venue_aliases]}
     if (
         str(cinema["id"]) != settings.venue_id

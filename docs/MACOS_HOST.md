@@ -37,3 +37,5 @@ To pause across logins, unload it and move the plist out of `~/Library/LaunchAge
 First real LaunchAgent run on October 2 at 18:37 IST exited 0. BookMyShow returned COMING_SOON and District MOVIE_LISTED. Both observations were saved locally, failure counters recovered, and no events/messages were produced. A second real invocation at 18:38 IST exited 0 with `not_due`, without another provider check or message. No synthetic data was injected into production state. Automated tests cover the local scheduler argument routing and sanitized launcher error status in addition to existing state/delivery tests.
 
 This is an operational local replacement for the cloud host. It does not establish laptop-off reliability. The 48–72-hour observation period and any new live notification acceptance exercise remain separate readiness checks; the Phase 5 Telegram test was already user-confirmed.
+
+November 7 update: the LaunchAgent wrapper now reads `config/locations.yml` and runs each due cinema independently. See [multiple venue configuration](MULTIPLE_VENUES.md). No plist reload is required for this code/config update. The default health command reports both venues.
